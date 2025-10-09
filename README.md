@@ -1,1 +1,63 @@
 # demo-build-container-image
+
+Dumb demo to demonstrate automatic build with 
+- Go lang compilatation & test on every related push
+- Docker image building (including go compilation inside Dockerfile) on every new tag
+- CI with GitHub Actions with push to [ghcr.io/pragmatic-fermat/demo-build-container-image:latest](ghcr.io/pragmatic-fermat/demo-build-container-image:latest)
+- Asynchronous build with DockerHub registry triggered by Web Hook
+
+[Cosign](https://docs.sigstore.dev/cosign/installation/#container-images) signature added.
+
+SBOM attachment added.
+
+In order to   :
+
+a) check the image's signature : 
+
+```bash
+cosign verify --key cosign.pub ghcr.io/pragmatic-fermat/demo-build-container-image
+```
+
+b) download the SBOM : 
+
+```bash
+cosign download sbom ghcr.io/pragmatic-fermat/demo-build-container-image --output-file mysbom.sbom
+```
+
+Then, analyze the vulns with [grype](https://github.com/anchore/grype) : 
+```bash
+grype mysbom.sbom
+```
+
+__Tip__: use the cosign image  (rather than the complex install) :
+
+a) Verify the iage's signature
+
+```bash
+docker run gcr.io/projectsigstore/cosign verify --key https://raw.githubusercontent.com/pragmatic-fermat-demo-build-container-image/master/cosign.pub ghcr.io/pragmatic-fermat/demo-build-container-image:latest
+```
+
+b) Download the Attestation
+
+```bash
+docker run gcr.io/projectsigstore/cosign verify-attestation ghcr.io/pragmatic-fermat/demo-build-container-image:latest --key https://raw.githubusercontent.com/pragmatic-fermat/demo-build-container-image/master/cosign.pub --type spdx > attestation.json
+```
+
+c) Extract the SBOM from attestation
+```bash
+jq -r '.payload' attestation.json | base64 -d | jq -r '.predicate' > sbom-spdx.json
+```
+
+d) Install grype 
+```bash
+curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+```
+
+e) Run 
+```bash
+grype ./sbom-spdx.json
+```
+or 
+```bash
+trivy sbom ./sbom-spdx.json 
+```
