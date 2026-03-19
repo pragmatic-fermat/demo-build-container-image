@@ -31,16 +31,16 @@ grype mysbom.sbom
 
 __Tip__: use the cosign image  (rather than the complex install) :
 
-a) Verify the iage's signature
+a) Verify the image's signature
 
 ```bash
-docker run gcr.io/projectsigstore/cosign verify --key https://raw.githubusercontent.com/pragmatic-fermat/demo-build-container-image/refs/heads/main/cosign.pub ghcr.io/pragmatic-fermat/demo-build-container-image:latest
+VER="v5"; docker run gcr.io/projectsigstore/cosign verify --key https://raw.githubusercontent.com/pragmatic-fermat/demo-build-container-image/refs/heads/main/cosign.pub ghcr.io/pragmatic-fermat/demo-build-container-image:${VER}
 ```
 
 b) Download the Attestation
 
 ```bash
-docker run gcr.io/projectsigstore/cosign verify-attestation ghcr.io/pragmatic-fermat/demo-build-container-image:latest --key https://raw.githubusercontent.com/pragmatic-fermat/demo-build-container-image/refs/heads/main/cosign.pub --type spdx > attestation.json
+docker run gcr.io/projectsigstore/cosign verify-attestation ghcr.io/pragmatic-fermat/demo-build-container-image:${VER} --key https://raw.githubusercontent.com/pragmatic-fermat/demo-build-container-image/refs/heads/main/cosign.pub --type spdx > attestation.json
 ```
 
 c) Extract the SBOM from attestation
